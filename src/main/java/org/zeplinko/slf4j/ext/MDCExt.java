@@ -17,7 +17,9 @@ package org.zeplinko.slf4j.ext;
 
 import org.slf4j.MDC;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -30,6 +32,19 @@ public final class MDCExt {
 
     private MDCExt() {
         // Private constructor to prevent instantiation
+    }
+
+    /**
+     * Creates an MDC entry with the specified key and value. Unlike
+     * {@link Map#entry(Object, Object)}, this method allows null values.
+     *
+     * @param key   the key (must not be null)
+     * @param value the value (maybe null)
+     * @return a new MDCExt.Entry instance
+     * @throws NullPointerException if key is null
+     */
+    public static MDCExt.Entry entry(String key, String value) {
+        return new MDCExt.Entry(key, value);
     }
 
     /**
@@ -53,10 +68,31 @@ public final class MDCExt {
      * @param entries varargs parameter of Map entries to add to the MDC
      * @return a closeable object that, when closed, will remove the added entries
      *         from the MDC
+     *
+     * @deprecated Instead use
+     *             {@link org.zeplinko.slf4j.ext.MDCExt#putCloseable(org.zeplinko.slf4j.ext.MDCExt.Entry...)}
      */
     @SafeVarargs
+    @Deprecated
     public static MDCExtCloseable putCloseable(Map.Entry<String, String>... entries) {
         return putCloseable(Map.ofEntries(entries));
+    }
+
+    /**
+     * Places multiple key-value pairs in the MDC from an array of MDCExt.Entry,
+     * returning a {@link MDCExtCloseable} that removes the entries when closed.
+     *
+     * @param entries varargs parameter of MDCExt.Entry to add to the MDC
+     * @return a closeable object that, when closed, will remove the added entries
+     *         from the MDC
+     */
+    public static MDCExtCloseable putCloseable(MDCExt.Entry... entries) {
+        HashSet<String> keys = new HashSet<>();
+        for (Entry entry : entries) {
+            MDC.put(entry.getKey(), entry.getValue());
+            keys.add(entry.getKey());
+        }
+        return new MDCExtCloseable(keys);
     }
 
     /**
@@ -103,6 +139,44 @@ public final class MDCExt {
         @Override
         public void close() {
             this.keys.forEach(MDC::remove);
+        }
+    }
+
+    /**
+     * Represents a key-value pair for MDC entries. Unlike {@link Map.Entry}, this
+     * class allows null values, which is necessary for MDC operations that need to
+     * set or remove context with null values.
+     */
+    public static final class Entry {
+
+        private static final String KEY_CANNOT_BE_NULL = "key cannot be null";
+
+        private final String key;
+
+        private final String value;
+
+        private Entry(String key, String value) {
+            Objects.requireNonNull(key, KEY_CANNOT_BE_NULL);
+            this.key = key;
+            this.value = value;
+        }
+
+        /**
+         * Returns the key of this entry.
+         *
+         * @return the key (never null)
+         */
+        public String getKey() {
+            return key;
+        }
+
+        /**
+         * Returns the value of this entry.
+         *
+         * @return the value (maybe null)
+         */
+        public String getValue() {
+            return value;
         }
     }
 }
