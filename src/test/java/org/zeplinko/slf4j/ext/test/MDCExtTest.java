@@ -34,6 +34,10 @@ class MDCExtTest {
 
     public static final String VALUE_SESSION_ID = "abc123";
 
+    public static final String KEY_USER_REFERRER = "userReferrer";
+
+    public static final String VALUE_USER_REFERRER = null;
+
     @Test
     void testPutCloseableWithSingleEntry() {
         try (MDCExt.MDCExtCloseable closeable = MDCExt.putCloseable(KEY_USER_ID, VALUE_USER_ID)) {
@@ -55,6 +59,24 @@ class MDCExtTest {
         }
         assertNull(MDC.get(KEY_USER_ID));
         assertNull(MDC.get(KEY_SESSION_ID));
+    }
+
+    @Test
+    void testPutCloseableWithMultipleMDCExtEntries() {
+        try (
+                var closeable = MDCExt.putCloseable(
+                        MDCExt.entry(KEY_USER_ID, VALUE_USER_ID),
+                        MDCExt.entry(KEY_SESSION_ID, VALUE_SESSION_ID),
+                        MDCExt.entry(KEY_USER_REFERRER, VALUE_USER_REFERRER)
+                )
+        ) {
+            assertEquals(VALUE_USER_ID, MDC.get(KEY_USER_ID));
+            assertEquals(VALUE_SESSION_ID, MDC.get(KEY_SESSION_ID));
+            assertEquals(VALUE_USER_REFERRER, MDC.get(KEY_USER_REFERRER));
+        }
+        assertNull(MDC.get(KEY_USER_ID));
+        assertNull(MDC.get(KEY_SESSION_ID));
+        assertNull(MDC.get(KEY_USER_REFERRER));
     }
 
     @Test
