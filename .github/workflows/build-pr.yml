@@ -3,7 +3,9 @@ name: "Build PR"
 on:
   pull_request:
     branches:
-      - main
+      - beta
+      - develop
+      - release
 
 jobs:
   build-pr:
