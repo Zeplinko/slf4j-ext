@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 import org.zeplinko.slf4j.ext.MDCExt;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,7 +41,7 @@ class MDCExtTest {
 
     @Test
     void testPutCloseableWithSingleEntry() {
-        try (MDCExt.MDCExtCloseable closeable = MDCExt.putCloseable(KEY_USER_ID, VALUE_USER_ID)) {
+        try (MDCExt.MDCExtCloseable ignored = MDCExt.putCloseable(KEY_USER_ID, VALUE_USER_ID)) {
             assertEquals(VALUE_USER_ID, MDC.get(KEY_USER_ID));
         }
         assertNull(MDC.get(KEY_USER_ID));
@@ -49,7 +50,7 @@ class MDCExtTest {
     @Test
     void testPutCloseableWithMultipleEntries() {
         try (
-                MDCExt.MDCExtCloseable closeable = MDCExt.putCloseable(
+                MDCExt.MDCExtCloseable ignored = MDCExt.putCloseable(
                         Map.entry(KEY_USER_ID, VALUE_USER_ID),
                         Map.entry(KEY_SESSION_ID, VALUE_SESSION_ID)
                 )
@@ -64,7 +65,7 @@ class MDCExtTest {
     @Test
     void testPutCloseableWithMultipleMDCExtEntries() {
         try (
-                var closeable = MDCExt.putCloseable(
+                var ignored = MDCExt.putCloseable(
                         MDCExt.entry(KEY_USER_ID, VALUE_USER_ID),
                         MDCExt.entry(KEY_SESSION_ID, VALUE_SESSION_ID),
                         MDCExt.entry(KEY_USER_REFERRER, VALUE_USER_REFERRER)
@@ -80,9 +81,29 @@ class MDCExtTest {
     }
 
     @Test
+    void testPutCloseableWithMDCExtEntriesList() {
+        try (
+                var ignored = MDCExt.putCloseable(
+                        List.of(
+                                MDCExt.entry(KEY_USER_ID, VALUE_USER_ID),
+                                MDCExt.entry(KEY_SESSION_ID, VALUE_SESSION_ID),
+                                MDCExt.entry(KEY_USER_REFERRER, VALUE_USER_REFERRER)
+                        )
+                )
+        ) {
+            assertEquals(VALUE_USER_ID, MDC.get(KEY_USER_ID));
+            assertEquals(VALUE_SESSION_ID, MDC.get(KEY_SESSION_ID));
+            assertEquals(VALUE_USER_REFERRER, MDC.get(KEY_USER_REFERRER));
+        }
+        assertNull(MDC.get(KEY_USER_ID));
+        assertNull(MDC.get(KEY_SESSION_ID));
+        assertNull(MDC.get(KEY_USER_REFERRER));
+    }
+
+    @Test
     void testPutCloseableWithMap() {
         Map<String, String> entries = Map.of(KEY_USER_ID, VALUE_USER_ID, KEY_SESSION_ID, VALUE_SESSION_ID);
-        try (MDCExt.MDCExtCloseable closeable = MDCExt.putCloseable(entries)) {
+        try (MDCExt.MDCExtCloseable ignored = MDCExt.putCloseable(entries)) {
             assertEquals(VALUE_USER_ID, MDC.get(KEY_USER_ID));
             assertEquals(VALUE_SESSION_ID, MDC.get(KEY_SESSION_ID));
         }

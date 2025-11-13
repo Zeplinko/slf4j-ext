@@ -18,6 +18,7 @@ package org.zeplinko.slf4j.ext;
 import org.slf4j.MDC;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -87,6 +88,25 @@ public final class MDCExt {
      *         from the MDC
      */
     public static MDCExtCloseable putCloseable(MDCExt.Entry... entries) {
+        Objects.requireNonNull(entries);
+        HashSet<String> keys = new HashSet<>();
+        for (Entry entry : entries) {
+            MDC.put(entry.getKey(), entry.getValue());
+            keys.add(entry.getKey());
+        }
+        return new MDCExtCloseable(keys);
+    }
+
+    /**
+     * Places multiple key-value pairs in the MDC from a list of MDCExt.Entry,
+     * returning a {@link MDCExtCloseable} that removes the entries when closed.
+     *
+     * @param entries list of MDCExt.Entry to add to the MDC
+     * @return a closeable object that, when closed, will remove the added entries
+     *         from the MDC
+     */
+    public static MDCExtCloseable putCloseable(List<Entry> entries) {
+        Objects.requireNonNull(entries, "entries cannot be null");
         HashSet<String> keys = new HashSet<>();
         for (Entry entry : entries) {
             MDC.put(entry.getKey(), entry.getValue());
