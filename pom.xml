@@ -176,7 +176,7 @@
     </build>
 
     <url>https://github.com/Zeplinko-Org/slf4j-ext</url>
-
+    <name>Slf4j Ext</name>
     <description>Library to extend the SLF4J features to improve the development experience</description>
 
     <licenses>
