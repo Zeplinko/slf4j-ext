@@ -1,7 +1,12 @@
 name: Publish package to the SonaType Central Repository
+
 on:
-  release:
-    types: [ created ]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: true
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -9,6 +14,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          repository: "Zeplinko/slf4j-ext"
+          ref: ${{ github.event.inputs.branch }}
 
       - name: Setup Java
         uses: actions/setup-java@v4
